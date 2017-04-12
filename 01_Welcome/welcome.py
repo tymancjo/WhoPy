@@ -1,3 +1,5 @@
+import time
+
 class WhoPy:
     '''This is a WhoPy class'''
     listOfWhoPy =[] #Here we weill memorize all of us!
@@ -24,9 +26,12 @@ names = ['Adam', 'Ewa', 'Zdzich', 'Julia']
 for currentName in names:
     aNewWhoPyObject = WhoPy(currentName)
 
+    time.sleep(1)
+
 # And now let's ask everybody who they are?
 print('And now let\'s ask everybody who they are?')
 for who in WhoPy.listOfWhoPy:
     print('Who are you?')
     who.sayHello()
-    print('\n')
+    
+    time.sleep(1)
