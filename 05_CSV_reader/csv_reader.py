@@ -16,6 +16,9 @@ class MainWindow:
 		self.frame = tk.Frame(self.master)
 		self.frame.pack(padx=5, pady=5)
 
+		self.tx1 = tk.Text(self.frame)
+		self.tx1.pack()
+
 		self.openButton = tk.Button(self.frame, text='Open CSV', command=self.openFile)
 		self.openButton.pack()
 
@@ -34,6 +37,7 @@ class MainWindow:
 			print('File {} opening issue'.format(filename))
 		else:
 			print(df.head())
+			self.console(df.head())
 			df = df.replace({',': '.'}, regex=True)
 			df = df.astype(float)
 			df.set_index('Time [s]', inplace=True)
@@ -43,6 +47,10 @@ class MainWindow:
 	def plotCSV(self, df):
 		df.plot()
 		plt.show()
+
+	def console(self, string):
+		self.tx1.insert(tk.END, str(string))
+
 
 # Here is where the main app starts
 if __name__ == '__main__':
