@@ -30,8 +30,16 @@ G[N-1] = 0  # Cleaning to 0 the end element - as it dosnt conduct off system
 Gc = np.ones(N) * inGc
 
 Q = np.ones(N) * inGc * T0   # Preparing free elelments vector
-# Q[int(3*N/4)] += inQ  # Seting up the middle element as the one with power losses
-Q[N // 2] += inQ
+Q[int(3*N/4)] += inQ  # Seting up the middle element as the one with power losses
+# Q[N // 2] += inQ
+
+Q2 = np.ones(N) * inGc * T0   # Preparing free elelments vector
+Q2[int(N/2)] += inQ  # Seting up the middle element as the one with power losses
+# Q2[N // 2] += inQ
+
+Q3 = np.ones(N) * inGc * T0   # Preparing free elelments vector
+Q3[int(N/4)] += inQ  # Seting up the middle element as the one with power losses
+# Q2[N // 2] += inQ
 
 
 def getGmatrix(n):
@@ -60,6 +68,8 @@ def getGmatrix(n):
 
 def SMDD(matrixList):
     size = 0
+    number = len(matrixList)
+
     for m in matrixList:
         size += m.shape[0]
 
@@ -72,15 +82,51 @@ def SMDD(matrixList):
         megaMacierz[actualRow:actualRow+m_size, actualRow:actualRow+m_size] = m
 
         actualRow += m_size
+    
+    # filling the connections G's
+    
+    actualRow = 0
+    for conn in range(number - 1):
+        # the connected matrix are:
+        m1 = matrixList[conn]
+        m2 = matrixList[conn + 1]
+
+        G1 = m1[-2][-1]
+        G2 = m2[1][0]
+
+        print(G1, G2)
+
+        R1 = 1 / (-2 * G1)
+        R2 = 1 / (-2 * G2)
+        R = R1 + R2
+        G = 1 / R
+
+
+        # adding abve and below diagonal
+        megaMacierz[actualRow + m1.shape[0]-1][actualRow + m1.shape[0]] = -G
+        megaMacierz[actualRow + m1.shape[0]][actualRow + m1.shape[0]-1] = -G
+        # adding to diagonal 
+        megaMacierz[actualRow + m1.shape[0]-1][actualRow + m1.shape[0]-1] += G
+        megaMacierz[actualRow + m1.shape[0]][actualRow + m1.shape[0]] += G
+
+        actualRow += m1.shape[0]
+
+
+
+
 
     return megaMacierz, size
 
 M = getGmatrix(N)
 
-T = np.linalg.solve(M, Q)
+Ta = np.linalg.solve(M, Q)
+Tb = np.linalg.solve(M, Q2)
+Tc = np.linalg.solve(M, Q3)
 
-NoweM, s = SMDD([M, M])
-NoweQ = np.concatenate((Q, Q), axis=0)
+T = np.concatenate((Ta, Tb, Tc))
+
+NoweM, s = SMDD([M, M, M])
+NoweQ = np.concatenate((Q, Q2, Q3), axis=0)
 
 noweT = np.linalg.solve(NoweM, NoweQ)
 print(M)
